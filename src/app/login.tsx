@@ -101,21 +101,10 @@ export default function LoginScreen() {
           : 'Entrar';
 
   const handleForgotPassword = () => {
-    Alert.alert(
-      'Recuperar Senha',
-      'Para redefinir sua senha, você pode acessar a página de recuperação no navegador web ou solicitar auxílio ao suporte da sua instituição.',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Abrir no navegador',
-          onPress: () => {
-            WebBrowser.openBrowserAsync('https://locus.app/forgot-password').catch(
-              () => {},
-            );
-          },
-        },
-      ],
-    );
+    router.push({
+      pathname: '/forgot-password',
+      params: email.trim() ? { email: email.trim() } : {},
+    });
   };
 
   const handleRegister = () => {
