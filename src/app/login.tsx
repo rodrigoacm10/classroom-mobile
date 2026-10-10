@@ -119,21 +119,7 @@ export default function LoginScreen() {
   };
 
   const handleRegister = () => {
-    Alert.alert(
-      'Criar Conta',
-      'Novos cadastros de instituições e convites de docentes podem ser aceitos pelo painel web do Locus.',
-      [
-        { text: 'Entendi', style: 'default' },
-        {
-          text: 'Acessar site',
-          onPress: () => {
-            WebBrowser.openBrowserAsync('https://locus.app/register').catch(
-              () => {},
-            );
-          },
-        },
-      ],
-    );
+    router.push('/register');
   };
 
   return (

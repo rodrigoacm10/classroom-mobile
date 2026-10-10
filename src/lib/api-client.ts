@@ -137,11 +137,28 @@ export async function api<T>(path: string, options: ApiOptions = {}): Promise<T>
   }
 
   const baseUrl = getApiUrl();
-  const response = await fetch(`${baseUrl}${path}`, {
-    ...rest,
-    headers: requestHeaders,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
-  });
+  const fullUrl = `${baseUrl}${path}`;
+
+  if (__DEV__) {
+    console.log(`[API] ${rest.method ?? 'GET'} ${fullUrl}`);
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(fullUrl, {
+      ...rest,
+      headers: requestHeaders,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+    });
+  } catch (netErr) {
+    if (__DEV__) {
+      console.warn(`[API Network Error] Falha ao conectar em ${fullUrl}:`, netErr);
+    }
+    throw new ApiError(
+      0,
+      `Não foi possível conectar ao servidor (${baseUrl}). Verifique se a API está rodando com '--host 0.0.0.0' e na mesma rede.`,
+    );
+  }
 
   // Handle 401 with silent token refresh
   if (response.status === 401 && !_isRetry && !skipAuthRefresh && !isAuthRoute) {

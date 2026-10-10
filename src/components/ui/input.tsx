@@ -11,6 +11,7 @@ export type InputProps = TextInputProps & {
   label?: string;
   headerRight?: React.ReactNode;
   invalid?: boolean;
+  disabled?: boolean;
   error?: string;
   containerClassName?: string;
   inputClassName?: string;
@@ -21,15 +22,19 @@ export function Input({
   label,
   headerRight,
   invalid = false,
+  disabled = false,
   error,
   containerClassName = '',
   inputClassName = '',
   rightAccessory,
   onFocus,
   onBlur,
+  editable,
   ...rest
 }: InputProps) {
   const [isFocused, setIsFocused] = useState(false);
+
+  const isEditable = editable !== undefined ? editable : !disabled;
 
   const hasError = invalid || Boolean(error);
 
@@ -55,9 +60,12 @@ export function Input({
       )}
 
       <View
-        className={`min-h-[48px] flex-row items-center rounded-sm border bg-paper px-3.5 ${getBorderColor()}`}
+        className={`min-h-[48px] flex-row items-center rounded-sm border px-3.5 ${
+          isEditable ? 'bg-paper' : 'bg-surface opacity-75'
+        } ${getBorderColor()}`}
       >
         <TextInput
+          editable={isEditable}
           className={`flex-1 py-3 font-sans text-body text-ink placeholder:text-muted ${inputClassName}`}
           placeholderTextColor="#5c5e63"
           onFocus={(e) => {
