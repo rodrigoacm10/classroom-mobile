@@ -63,9 +63,7 @@ export function HomeAluno() {
           studentInitials={dashboard.studentInitials}
         />
 
-        {dashboard.activeCall ? (
-          <CallBanner call={dashboard.activeCall} timeRemaining={timeRemaining} />
-        ) : null}
+        <CallBanner call={dashboard.activeCall} timeRemaining={timeRemaining} />
 
         <HomeStats
           classesCount={dashboard.classesCount}
