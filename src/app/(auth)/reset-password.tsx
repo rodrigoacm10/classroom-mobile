@@ -3,14 +3,14 @@ import { View, Text, Pressable } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 
-import { SecondaryScreen } from '../components/ui/secondary-screen';
-import { RecoverySteps } from '../components/ui/flow-steps';
-import { Input } from '../components/ui/input';
-import { Button } from '../components/ui/button';
-import { Notice } from '../components/ui/notice';
-import { ApiError } from '../lib/api-client';
-import { resetPassword } from '../services/password-recovery';
-import { clearResetSessionToken, getResetSessionToken } from '../lib/reset-session';
+import { SecondaryScreen } from '@/components/ui/secondary-screen';
+import { RecoverySteps } from '@/components/ui/flow-steps';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Notice } from '@/components/ui/notice';
+import { ApiError } from '@/lib/api-client';
+import { resetPassword } from '@/services/password-recovery';
+import { clearResetSessionToken, getResetSessionToken } from '@/lib/reset-session';
 
 function getPasswordStrength(password: string): {
   level: 0 | 1 | 2 | 3;
