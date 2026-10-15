@@ -8,13 +8,13 @@ import {
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 
-import { SecondaryScreen } from '../components/ui/secondary-screen';
-import { Input } from '../components/ui/input';
-import { Button } from '../components/ui/button';
-import { Notice } from '../components/ui/notice';
-import { ApiError } from '../lib/api-client';
-import { login } from '../services/auth';
-import { listMyTenants, switchTenant } from '../services/tenants';
+import { SecondaryScreen } from '@/components/ui/secondary-screen';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Notice } from '@/components/ui/notice';
+import { ApiError } from '@/lib/api-client';
+import { login } from '@/services/auth';
+import { listMyTenants, switchTenant } from '@/services/tenants';
 
 type Phase = 'credentials' | 'resolving' | 'switching';
 

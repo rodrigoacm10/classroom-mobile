@@ -7,7 +7,7 @@ import {
   GestureResponderEvent,
 } from 'react-native';
 
-type ButtonVariant = 'ink' | 'accent' | 'outline';
+type ButtonVariant = 'ink' | 'accent' | 'outline' | 'danger';
 type ButtonSize = 'md' | 'lg';
 
 export type ButtonProps = {
@@ -39,12 +39,14 @@ export function Button({
     ink: 'bg-ink active:bg-ink/90',
     accent: 'bg-accent active:opacity-90',
     outline: 'border border-control-border bg-paper active:bg-surface',
+    danger: 'bg-danger active:opacity-90',
   };
 
   const textVariantStyles: Record<ButtonVariant, string> = {
     ink: 'text-on-ink font-sans-semibold',
     accent: 'text-ink font-sans-semibold',
     outline: 'text-ink font-sans-medium',
+    danger: 'text-on-ink font-sans-semibold',
   };
 
   const sizeStyles: Record<ButtonSize, string> = {

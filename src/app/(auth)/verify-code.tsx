@@ -8,13 +8,13 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 
-import { SecondaryScreen } from '../components/ui/secondary-screen';
-import { RecoverySteps } from '../components/ui/flow-steps';
-import { Button } from '../components/ui/button';
-import { Notice } from '../components/ui/notice';
-import { ApiError } from '../lib/api-client';
-import { forgotPassword, verifyResetCode } from '../services/password-recovery';
-import { setResetSessionToken } from '../lib/reset-session';
+import { SecondaryScreen } from '@/components/ui/secondary-screen';
+import { RecoverySteps } from '@/components/ui/flow-steps';
+import { Button } from '@/components/ui/button';
+import { Notice } from '@/components/ui/notice';
+import { ApiError } from '@/lib/api-client';
+import { forgotPassword, verifyResetCode } from '@/services/password-recovery';
+import { setResetSessionToken } from '@/lib/reset-session';
 
 export default function VerifyCodeScreen() {
   const router = useRouter();

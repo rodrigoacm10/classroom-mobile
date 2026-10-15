@@ -8,20 +8,20 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 
-import { SecondaryScreen } from '../components/ui/secondary-screen';
-import { Input } from '../components/ui/input';
-import { Button } from '../components/ui/button';
-import { Notice } from '../components/ui/notice';
-import { ApiError } from '../lib/api-client';
-import { registerUser } from '../services/user';
-import { login } from '../services/auth';
+import { SecondaryScreen } from '@/components/ui/secondary-screen';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Notice } from '@/components/ui/notice';
+import { ApiError } from '@/lib/api-client';
+import { registerUser } from '@/services/user';
+import { login } from '@/services/auth';
 import {
   acceptInvite,
   getInvite,
   listMyTenants,
   switchTenant,
   InviteStatusResponse,
-} from '../services/tenants';
+} from '@/services/tenants';
 
 type Phase =
   | 'form'

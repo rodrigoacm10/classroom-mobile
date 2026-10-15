@@ -1,123 +1,76 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { Logo } from '../components/ui/logo';
-import { Button } from '../components/ui/button';
-import { getStoredAccessToken } from '../lib/storage';
-import { logout } from '../services/auth';
-import { listMyTenants, MyTenantResponse } from '../services/tenants';
+import { StatusBar } from 'expo-status-bar';
+import { Redirect } from 'expo-router';
 
-export default function HomeScreen() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState<string | null>(null);
-  const [tenants, setTenants] = useState<MyTenantResponse[]>([]);
+import { getStoredAccessToken } from '@/lib/storage';
+import { getMyProfile, UserProfileResponse } from '@/services/user';
+import { Logo } from '@/components/ui/logo';
+
+export default function IndexGatekeeper() {
+  const [checking, setChecking] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
 
-    async function checkSession() {
+    async function checkAuth() {
       try {
-        const storedToken = await getStoredAccessToken();
-        if (!storedToken) {
+        const token = await getStoredAccessToken();
+        if (!token) {
           if (isMounted) {
-            router.replace('/login');
+            setIsAuthenticated(false);
+            setChecking(false);
           }
           return;
         }
 
-        if (isMounted) {
-          setToken(storedToken);
-        }
-
         try {
-          const myTenants = await listMyTenants(storedToken);
+          const profile = await getMyProfile();
           if (isMounted) {
-            setTenants(myTenants);
+            setRole(profile.role ?? 'aluno');
           }
         } catch {
-          // Token might have expired or endpoint failed
+          // If token fails, assume student default or unauthenticated
+        }
+
+        if (isMounted) {
+          setIsAuthenticated(true);
         }
       } catch {
         if (isMounted) {
-          router.replace('/login');
+          setIsAuthenticated(false);
         }
       } finally {
         if (isMounted) {
-          setLoading(false);
+          setChecking(false);
         }
       }
     }
 
-    checkSession();
+    checkAuth();
 
     return () => {
       isMounted = false;
     };
-  }, [router]);
+  }, []);
 
-  async function handleLogout() {
-    setLoading(true);
-    await logout();
-    router.replace('/login');
-  }
-
-  if (loading) {
+  if (checking) {
     return (
       <SafeAreaView className="flex-1 bg-paper items-center justify-center p-6">
+        <StatusBar style="dark" />
         <Logo />
-        <ActivityIndicator size="small" color="#18191b" className="mt-6" />
+        <ActivityIndicator size="small" color="#18191B" className="mt-6" />
       </SafeAreaView>
     );
   }
 
-  const activeTenant = tenants.find((t) => t.active && !t.deleted);
+  if (!isAuthenticated) {
+    return <Redirect href="/login" />;
+  }
 
-  return (
-    <SafeAreaView className="flex-1 bg-paper justify-between p-6">
-      <View className="items-center mt-8">
-        <Logo />
-        <Text className="font-sans-bold text-section-sm text-ink mt-6 text-center">
-          Painel Locus
-        </Text>
-        <Text className="font-sans text-body text-muted text-center mt-2 max-w-[320px]">
-          {activeTenant
-            ? `Conectado à instituição ${activeTenant.name}.`
-            : 'Sessão ativa autenticada no aplicativo.'}
-        </Text>
-
-        {activeTenant && (
-          <View className="mt-6 px-4 py-3 rounded-sm bg-surface border border-border w-full max-w-[340px]">
-            <Text className="font-mono text-caption text-muted">
-              INSTITUIÇÃO
-            </Text>
-            <Text className="font-sans-semibold text-body text-ink mt-0.5">
-              {activeTenant.name}
-            </Text>
-            <Text className="font-mono text-caption text-muted mt-1">
-              Papel: {activeTenant.role.toUpperCase()}
-            </Text>
-          </View>
-        )}
-      </View>
-
-      <View className="w-full max-w-[340px] self-center gap-3 mb-6">
-        <Button
-          variant="outline"
-          size="lg"
-          onPress={() => router.push('/login')}
-        >
-          Trocar Conta
-        </Button>
-        <Button
-          variant="ink"
-          size="lg"
-          onPress={handleLogout}
-        >
-          Sair da Conta
-        </Button>
-      </View>
-    </SafeAreaView>
-  );
+  // Redireciona para o grupo de rotas de acordo com a role
+  return <Redirect href="/(aluno)/(tabs)" />;
 }
