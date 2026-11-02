@@ -219,8 +219,8 @@ export default function RegisterScreen() {
       }
 
       if (activeTenants.length > 1) {
-        // Múltiplas instituições
-        router.replace('/');
+        // Múltiplas instituições — vai para a tela de escolha
+        router.replace('/select-tenant');
         return;
       }
 
