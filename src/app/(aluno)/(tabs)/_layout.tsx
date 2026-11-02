@@ -1,4 +1,5 @@
 import React from 'react';
+import { View, Text } from 'react-native';
 import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Rect, Path, Circle } from 'react-native-svg';
@@ -25,10 +26,32 @@ export default function StudentTabsLayout() {
           paddingTop: 6,
           paddingBottom: bottomInset > 0 ? bottomInset : 8,
         },
-        tabBarLabelStyle: {
-          fontFamily: 'Archivo_600SemiBold',
-          fontSize: 12,
-        },
+        tabBarLabel: ({ focused, color, children }) => (
+          <View style={{ alignItems: 'center' }}>
+            <Text
+              style={{
+                fontFamily: focused ? 'Archivo_700Bold' : 'Archivo_500Medium',
+                fontSize: 12,
+                color,
+              }}
+            >
+              {children}
+            </Text>
+            {focused ? (
+              <View
+                style={{
+                  width: 16,
+                  height: 3,
+                  borderRadius: 2,
+                  backgroundColor: '#FFC400',
+                  marginTop: 2,
+                }}
+              />
+            ) : (
+              <View style={{ width: 16, height: 3, marginTop: 2 }} />
+            )}
+          </View>
+        ),
       }}
     >
       <Tabs.Screen
