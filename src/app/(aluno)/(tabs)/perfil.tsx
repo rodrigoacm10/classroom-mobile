@@ -119,9 +119,9 @@ export default function PerfilScreen() {
           <Button
             variant="outline"
             size="md"
-            onPress={() => router.push('/login')}
+            onPress={() => router.push('/select-tenant')}
           >
-            Trocar Instituição / Conta
+            Trocar Instituição
           </Button>
 
           <Button

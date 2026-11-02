@@ -75,7 +75,7 @@ export default function LoginScreen() {
       // Mais de uma instituição ativa — redireciona para a tela de escolha
       setSuccess(true);
       setTimeout(() => {
-        router.replace('/');
+        router.replace('/select-tenant');
       }, 500);
     } catch (cause) {
       if (cause instanceof ApiError) {

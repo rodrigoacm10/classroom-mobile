@@ -11,6 +11,7 @@ import { Logo } from '@/components/ui/logo';
 export default function IndexGatekeeper() {
   const [checking, setChecking] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [needsTenant, setNeedsTenant] = useState(false);
   const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
@@ -31,6 +32,9 @@ export default function IndexGatekeeper() {
           const profile = await getMyProfile();
           if (isMounted) {
             setRole(profile.role ?? 'aluno');
+            if (!profile.tenant_id) {
+              setNeedsTenant(true);
+            }
           }
         } catch {
           // If token fails, assume student default or unauthenticated
@@ -69,6 +73,10 @@ export default function IndexGatekeeper() {
 
   if (!isAuthenticated) {
     return <Redirect href="/login" />;
+  }
+
+  if (needsTenant) {
+    return <Redirect href="/select-tenant" />;
   }
 
   // Redireciona para o grupo de rotas de acordo com a role

@@ -16,6 +16,8 @@ import {
   IBMPlexMono_700Bold,
 } from '@expo-google-fonts/ibm-plex-mono';
 
+import { getOrCreateDeviceId } from '@/lib/storage';
+
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -31,6 +33,11 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
+    // Garante a geração e persistência do ID exclusivo do aparelho na inicialização
+    getOrCreateDeviceId().catch(() => {});
+  }, []);
+
+  useEffect(() => {
     if (loaded || error) {
       SplashScreen.hideAsync();
     }
@@ -43,6 +50,7 @@ export default function RootLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
+      <Stack.Screen name="select-tenant" />
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(aluno)" />
     </Stack>
