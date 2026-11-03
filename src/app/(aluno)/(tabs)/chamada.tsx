@@ -8,6 +8,8 @@ import {
   Alert,
   Pressable,
   RefreshControl,
+  type NativeSyntheticEvent,
+  type TextInputKeyPressEventData,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -37,7 +39,7 @@ export default function ChamadaScreen() {
   const [activeSession, setActiveSession] = useState<StudentActiveSessionResponse | null>(null);
   const [timeRemaining, setTimeRemaining] = useState('');
 
-  const [digits, setDigits] = useState(['', '', '', '']);
+  const [digits, setDigits] = useState(['', '', '', '', '', '']);
   const [focusedIndex, setFocusedIndex] = useState<number | null>(0);
   const [cursorVisible, setCursorVisible] = useState(true);
   const [evidencePhoto, setEvidencePhoto] = useState<string | null>(null);
@@ -100,18 +102,21 @@ export default function ChamadaScreen() {
   }, []);
 
   const handleDigitChange = (val: string, index: number) => {
-    const cleaned = val.replace(/[^0-9]/g, '');
+    const cleaned = val.toUpperCase().replace(/[^A-Z0-9]/g, '');
     const newDigits = [...digits];
     newDigits[index] = cleaned.slice(-1);
     setDigits(newDigits);
 
-    if (cleaned && index < 3) {
+    if (cleaned && index < 5) {
       inputRefs.current[index + 1]?.focus();
       setFocusedIndex(index + 1);
     }
   };
 
-  const handleKeyPress = (e: any, index: number) => {
+  const handleKeyPress = (
+    e: NativeSyntheticEvent<TextInputKeyPressEventData>,
+    index: number,
+  ) => {
     if (e.nativeEvent.key === 'Backspace') {
       if (!digits[index] && index > 0) {
         inputRefs.current[index - 1]?.focus();
@@ -160,9 +165,9 @@ export default function ChamadaScreen() {
   const handleConfirm = async () => {
     if (!activeSession) return;
 
-    const code = digits.join('');
-    if (code.length < 4) {
-      Alert.alert('Código incompleto', 'Por favor, digite os 4 dígitos do código da aula.');
+    const code = digits.join('').toUpperCase();
+    if (code.length < 6) {
+      Alert.alert('Código incompleto', 'Por favor, digite os 6 caracteres do código da aula.');
       return;
     }
 
@@ -204,14 +209,15 @@ export default function ChamadaScreen() {
       } else {
         Alert.alert('Sucesso!', 'Sua presença foi confirmada dentro da sala de aula com sucesso.');
       }
-    } catch (err: any) {
+    } catch (err) {
       if (err instanceof LocationServiceError) {
         Alert.alert('Localização necessária', err.message);
       } else if (err instanceof ApiError) {
         Alert.alert('Atenção', err.message);
+      } else if (err instanceof Error) {
+        Alert.alert('Atenção', err.message);
       } else {
-        const msg = err?.message || 'Não foi possível confirmar a presença.';
-        Alert.alert('Atenção', msg);
+        Alert.alert('Atenção', 'Não foi possível confirmar a presença.');
       }
     } finally {
       setSubmitting(false);
@@ -340,7 +346,12 @@ export default function ChamadaScreen() {
             {classLabel}
           </Text>
           <Pressable
-            onPress={() => router.push(`/turma/${activeSession.subject_class_id}` as any)}
+            onPress={() =>
+              router.push({
+                pathname: '/turma/[id]',
+                params: { id: activeSession.subject_class_id },
+              })
+            }
             hitSlop={6}
             className="flex-row items-center gap-1 mt-0.5 active:opacity-70 self-start"
           >
@@ -399,8 +410,8 @@ export default function ChamadaScreen() {
               </Text>
             </View>
 
-            <View className="flex-row justify-between w-full gap-3">
-              {[0, 1, 2, 3].map((index) => {
+            <View className="flex-row justify-between w-full gap-2">
+              {[0, 1, 2, 3, 4, 5].map((index) => {
                 const isFocused = focusedIndex === index;
                 const hasValue = !!digits[index];
 
@@ -415,16 +426,16 @@ export default function ChamadaScreen() {
                       inputRefs.current[index]?.focus();
                       setFocusedIndex(index);
                     }}
-                    className={`flex-1 h-[80px] rounded-2xl items-center justify-center border-2 ${boxBorderClass}`}
+                    className={`flex-1 h-[70px] rounded-xl items-center justify-center border-2 ${boxBorderClass}`}
                   >
                     {isFocused && !hasValue ? (
                       <View
-                        className={`w-[2px] h-[28px] rounded-[1px] bg-ink ${
+                        className={`w-[2px] h-[24px] rounded-[1px] bg-ink ${
                           cursorVisible ? 'opacity-100' : 'opacity-0'
                         }`}
                       />
                     ) : hasValue ? (
-                      <Text className="font-mono-bold text-[32px] text-ink">
+                      <Text className="font-mono-bold text-[24px] text-ink">
                         {digits[index]}
                       </Text>
                     ) : null}
@@ -442,7 +453,8 @@ export default function ChamadaScreen() {
                           setFocusedIndex(null);
                         }
                       }}
-                      keyboardType="number-pad"
+                      autoCapitalize="characters"
+                      autoCorrect={false}
                       maxLength={1}
                       selectTextOnFocus
                       caretHidden
