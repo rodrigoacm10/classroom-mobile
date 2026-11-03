@@ -103,7 +103,12 @@ export function HistoricoAluno() {
                   selectedClassId={selectedClassId}
                   onToggle={toggleClass}
                   onClear={clearClass}
-                  onOpenDetails={(id) => router.push(`/turma/${id}` as any)}
+                  onOpenDetails={(id) =>
+                    router.push({
+                      pathname: '/turma/[id]',
+                      params: { id },
+                    })
+                  }
                 />
                 {hasAnySessions ? (
                   <StatusFilter filter={filter} counts={counts} onChange={setFilter} />
