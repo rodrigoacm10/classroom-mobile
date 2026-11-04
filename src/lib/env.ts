@@ -14,10 +14,21 @@ export function getApiUrl(): string {
   }
 
   if (__DEV__) {
+interface ExpoGoManifest {
+  manifest2?: {
+    extra?: {
+      expoGo?: {
+        debuggerHost?: string;
+      };
+    };
+  };
+}
+
     // Detect host machine IP automatically from Expo bundler connection
+    const extendedConstants = Constants as unknown as ExpoGoManifest;
     const hostUri =
       Constants.expoConfig?.hostUri ??
-      (Constants as any).manifest2?.extra?.expoGo?.debuggerHost ??
+      extendedConstants.manifest2?.extra?.expoGo?.debuggerHost ??
       Constants.experienceUrl;
 
     if (hostUri) {

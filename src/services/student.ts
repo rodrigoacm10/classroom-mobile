@@ -7,8 +7,12 @@ export type StudentActiveSessionResponse = {
   discipline_name: string;
   opened_at: string;
   expires_at: string;
+  duration_minutes?: number;
+  room_id?: string | null;
   room_name?: string | null;
   already_confirmed?: boolean;
+  record_id?: string | null;
+  record_status?: AttendanceRecordStatus | null;
 };
 
 export type StudentSubjectClassResponse = {
@@ -46,11 +50,13 @@ export type StudentAttendanceHistoryItem = {
   subject_class_id: string;
   subject_class_name: string;
   discipline_name: string;
+  room_id?: string | null;
   room_name: string | null;
   opened_at: string;
   session_status: AttendanceSessionStatus;
   record_status: AttendanceRecordStatus | null;
   confirmed_at: string | null;
+  record_id?: string | null;
 };
 
 /** GET /attendance-sessions/active/me */
@@ -86,7 +92,14 @@ export type AttendanceRecordResponse = {
   longitude: number;
   distance_meters: number;
   within_radius: boolean;
+  gps_accuracy_meters?: number | null;
   record_status: AttendanceRecordStatus;
+  irregularity_flags?: string[];
+  reviewed_by?: string | null;
+  reviewed_at?: string | null;
+  review_note?: string | null;
+  device_id?: string | null;
+  evidence_photo_url?: string | null;
 };
 
 /** POST /subject-classes/{subject_class_id}/attendance-sessions/{session_id}/confirm */

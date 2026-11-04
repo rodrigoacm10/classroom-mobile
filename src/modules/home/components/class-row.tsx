@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Pressable, DimensionValue } from 'react-native';
 import { useRouter } from 'expo-router';
+import Svg, { Path } from 'react-native-svg';
 
 import type { StudentClassItem } from '../types';
 
@@ -12,11 +13,12 @@ export function ClassRow({ item }: { item: StudentClassItem }) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`Turma ${item.name}`}
+      accessibilityLabel={`Turma ${item.name}, taxa de presença ${item.attendanceRate}%. Toque para ver detalhes.`}
       onPress={() => {
-        if (item.isLive) {
-          router.push('/chamada');
-        }
+        router.push({
+          pathname: '/turma/[id]',
+          params: { id: item.id },
+        });
       }}
       className="flex-row items-center h-[68px] gap-3 border-b border-border active:bg-surface/50"
     >
@@ -40,20 +42,32 @@ export function ClassRow({ item }: { item: StudentClassItem }) {
         </Text>
       </View>
 
-      <View className="w-14 shrink-0 items-end gap-1.5">
-        <Text
-          className={`font-mono-bold text-[16px] leading-5 ${
-            isDanger ? 'text-danger' : 'text-success'
-          }`}
-        >
-          {item.attendanceRate}%
-        </Text>
-        <View className="w-7 h-1 rounded-full bg-surface overflow-hidden">
-          <View
-            style={{ width: fillWidthPct }}
-            className={`h-full rounded-full ${isDanger ? 'bg-danger' : 'bg-success'}`}
-          />
+      <View className="flex-row items-center gap-2 shrink-0">
+        <View className="w-14 items-end gap-1.5">
+          <Text
+            className={`font-mono-bold text-[16px] leading-5 ${
+              isDanger ? 'text-danger' : 'text-success'
+            }`}
+          >
+            {item.attendanceRate}%
+          </Text>
+          <View className="w-7 h-1 rounded-full bg-surface overflow-hidden">
+            <View
+              style={{ width: fillWidthPct }}
+              className={`h-full rounded-full ${isDanger ? 'bg-danger' : 'bg-success'}`}
+            />
+          </View>
         </View>
+
+        <Svg width={14} height={14} viewBox="0 0 20 20" fill="none">
+          <Path
+            d="M7.5 4.5L13 10l-5.5 5.5"
+            stroke="#8A8C91"
+            strokeWidth={1.8}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </Svg>
       </View>
     </Pressable>
   );
