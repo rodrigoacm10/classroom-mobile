@@ -406,7 +406,7 @@ export default function ChamadaScreen() {
                 Código do dia
               </Text>
               <Text className="font-sans text-muted text-caption">
-                Digite os 4 dígitos que o professor exibiu
+                Digite os 6 caracteres que o professor exibiu
               </Text>
             </View>
 
