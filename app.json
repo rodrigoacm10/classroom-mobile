@@ -10,7 +10,8 @@
     "ios": {
       "icon": "./assets/expo.icon",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "O Locus precisa da sua localização para confirmar sua presença na sala de aula durante a chamada."
+        "NSLocationWhenInUseUsageDescription": "O Locus precisa da sua localização para confirmar sua presença na sala de aula durante a chamada.",
+        "NSCameraUsageDescription": "O Locus precisa da câmera para anexar uma foto de evidência da sua presença, quando você escolher."
       }
     },
     "android": {
@@ -25,6 +26,7 @@
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
+        "CAMERA",
         "POST_NOTIFICATIONS"
       ],
       "predictiveBackGestureEnabled": false
@@ -48,6 +50,12 @@
         "expo-location",
         {
           "locationWhenInUsePermission": "O Locus precisa da sua localização para confirmar sua presença na sala de aula durante a chamada."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "O Locus precisa da câmera para anexar uma foto de evidência da sua presença, quando você escolher."
         }
       ],
       [
