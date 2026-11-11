@@ -1,4 +1,5 @@
 import { api } from '../lib/api-client';
+import { unregisterPushNotificationsAsync } from '../lib/notifications';
 import {
   clearAllStoredAuth,
   getStoredAccessToken,
@@ -32,6 +33,12 @@ export async function login(email: string, password: string): Promise<LoginMobil
 }
 
 export async function logout(): Promise<void> {
+  try {
+    await unregisterPushNotificationsAsync();
+  } catch {
+    // Non-blocking on network failure
+  }
+
   try {
     const token = await getStoredAccessToken();
     await api<MessageResponse>('/auth/logout', {
