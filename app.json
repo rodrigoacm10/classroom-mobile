@@ -24,7 +24,8 @@
       },
       "permissions": [
         "ACCESS_COARSE_LOCATION",
-        "ACCESS_FINE_LOCATION"
+        "ACCESS_FINE_LOCATION",
+        "POST_NOTIFICATIONS"
       ],
       "predictiveBackGestureEnabled": false
     },
@@ -47,6 +48,14 @@
         "expo-location",
         {
           "locationWhenInUsePermission": "O Locus precisa da sua localização para confirmar sua presença na sala de aula durante a chamada."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#18191B",
+          "defaultChannel": "chamadas"
         }
       ]
     ],
