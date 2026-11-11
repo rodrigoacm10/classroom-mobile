@@ -32,7 +32,7 @@ import { getOrCreateDeviceId } from '@/lib/storage';
 
 export default function ChamadaScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ sessionId?: string }>();
+  const params = useLocalSearchParams<{ sessionId?: string; dayCode?: string }>();
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -48,6 +48,23 @@ export default function ChamadaScreen() {
   const [confirmed, setConfirmed] = useState(false);
 
   const inputRefs = useRef<Array<TextInput | null>>([]);
+
+  useEffect(() => {
+    if (params.dayCode) {
+      const cleaned = params.dayCode
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, '')
+        .slice(0, 6);
+      if (cleaned.length > 0) {
+        const nextDigits = ['', '', '', '', '', ''];
+        for (let i = 0; i < cleaned.length; i++) {
+          nextDigits[i] = cleaned[i];
+        }
+        setDigits(nextDigits);
+        setFocusedIndex(cleaned.length < 6 ? cleaned.length : null);
+      }
+    }
+  }, [params.dayCode]);
 
   const loadSession = useCallback(async () => {
     try {
