@@ -16,11 +16,15 @@ import { StatusBar } from 'expo-status-bar';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Svg, { Path, Rect, Circle } from 'react-native-svg';
 
+import { Image } from 'expo-image';
+
 import { ApiError } from '@/lib/api-client';
+import { captureEvidencePhoto, EvidencePhotoError } from '@/lib/evidence-photo';
 import { formatRemaining } from '@/lib/utils';
 import {
   getStudentActiveSessions,
   confirmStudentAttendance,
+  uploadStudentEvidencePhoto,
   type StudentActiveSessionResponse,
 } from '@/services/student';
 import {
@@ -42,9 +46,16 @@ export default function ChamadaScreen() {
   const [digits, setDigits] = useState(['', '', '', '', '', '']);
   const [focusedIndex, setFocusedIndex] = useState<number | null>(0);
   const [cursorVisible, setCursorVisible] = useState(true);
-  const [evidencePhoto, setEvidencePhoto] = useState<string | null>(null);
+  const [evidencePhoto, setEvidencePhoto] = useState<{
+    uri: string;
+    mimeType: string;
+    fileName: string;
+    uploadedUrl: string | null;
+  } | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [submittingPhase, setSubmittingPhase] = useState<'idle' | 'location' | 'sending'>('idle');
+  const [submittingPhase, setSubmittingPhase] = useState<
+    'idle' | 'location' | 'photo' | 'sending'
+  >('idle');
   const [confirmed, setConfirmed] = useState(false);
 
   const inputRefs = useRef<Array<TextInput | null>>([]);
@@ -110,6 +121,10 @@ export default function ChamadaScreen() {
     return () => clearInterval(interval);
   }, [activeSession]);
 
+  useEffect(() => {
+    setEvidencePhoto(null);
+  }, [activeSession?.session_id]);
+
   // Cursor piscante
   useEffect(() => {
     const timer = setInterval(() => {
@@ -146,37 +161,47 @@ export default function ChamadaScreen() {
     }
   };
 
-  const handleEvidencePress = () => {
-    if (evidencePhoto) {
-      Alert.alert(
-        'Evidência anexada',
-        'Deseja remover ou substituir a foto de evidência?',
-        [
-          {
-            text: 'Remover',
-            style: 'destructive',
-            onPress: () => setEvidencePhoto(null),
-          },
-          {
-            text: 'Substituir foto',
-            onPress: () => setEvidencePhoto('evidencia_presenca.jpg'),
-          },
-          { text: 'Cancelar', style: 'cancel' },
-        ]
-      );
-    } else {
-      Alert.alert(
-        'Adicionar foto de evidência',
-        'Opcional para fins de auditoria quando solicitado pelo professor.',
-        [
-          { text: 'Cancelar', style: 'cancel' },
-          {
-            text: 'Anexar foto',
-            onPress: () => setEvidencePhoto('evidencia_presenca.jpg'),
-          },
-        ]
-      );
+  const openEvidenceCamera = async () => {
+    try {
+      const captured = await captureEvidencePhoto();
+      if (!captured) return;
+      setEvidencePhoto({
+        uri: captured.uri,
+        mimeType: captured.mimeType,
+        fileName: captured.fileName,
+        uploadedUrl: null,
+      });
+    } catch (err) {
+      const message =
+        err instanceof EvidencePhotoError
+          ? err.message
+          : 'Não foi possível abrir a câmera neste aparelho.';
+      Alert.alert('Foto de evidência', message);
     }
+  };
+
+  const handleEvidencePress = () => {
+    if (submitting) return;
+
+    if (!evidencePhoto) {
+      void openEvidenceCamera();
+      return;
+    }
+
+    Alert.alert('Evidência anexada', 'Deseja remover ou substituir a foto de evidência?', [
+      {
+        text: 'Remover',
+        style: 'destructive',
+        onPress: () => setEvidencePhoto(null),
+      },
+      {
+        text: 'Substituir foto',
+        onPress: () => {
+          void openEvidenceCamera();
+        },
+      },
+      { text: 'Cancelar', style: 'cancel' },
+    ]);
   };
 
   const handleConfirm = async () => {
@@ -195,12 +220,26 @@ export default function ChamadaScreen() {
       // 1. Obtém a localização GPS real do aluno com alta precisão
       const loc = await getStudentDeviceLocation();
 
-      // 2. Coleta identificador seguro e metadados do aparelho
-      setSubmittingPhase('sending');
       const deviceId = await getOrCreateDeviceId();
       const deviceInfo = getDeviceMetadata();
 
-      // 3. Envia para a API validar código e raio da sala
+      let evidenceUrl = evidencePhoto?.uploadedUrl ?? null;
+      if (evidencePhoto && !evidenceUrl) {
+        setSubmittingPhase('photo');
+        const uploaded = await uploadStudentEvidencePhoto(
+          activeSession.subject_class_id,
+          activeSession.session_id,
+          evidencePhoto,
+        );
+        evidenceUrl = uploaded.url;
+        setEvidencePhoto((current) =>
+          current && current.uri === evidencePhoto.uri
+            ? { ...current, uploadedUrl: uploaded.url }
+            : current,
+        );
+      }
+
+      setSubmittingPhase('sending');
       const record = await confirmStudentAttendance(
         activeSession.subject_class_id,
         activeSession.session_id,
@@ -211,6 +250,7 @@ export default function ChamadaScreen() {
           gps_accuracy_meters: loc.accuracy ?? 5.0,
           device_id: deviceId,
           device_info: deviceInfo,
+          ...(evidenceUrl ? { evidence_photo_url: evidenceUrl } : {}),
         },
       );
 
@@ -227,8 +267,8 @@ export default function ChamadaScreen() {
         Alert.alert('Sucesso!', 'Sua presença foi confirmada dentro da sala de aula com sucesso.');
       }
     } catch (err) {
-      if (err instanceof LocationServiceError) {
-        Alert.alert('Localização necessária', err.message);
+      if (err instanceof LocationServiceError || err instanceof EvidencePhotoError) {
+        Alert.alert('Atenção', err.message);
       } else if (err instanceof ApiError) {
         Alert.alert('Atenção', err.message);
       } else if (err instanceof Error) {
@@ -493,39 +533,53 @@ export default function ChamadaScreen() {
 
             <Pressable
               onPress={handleEvidencePress}
+              disabled={submitting}
               style={{ borderStyle: 'dashed' }}
-              className="flex-row items-center w-full py-[14px] px-4 rounded-2xl gap-[14px] border-[1.5px] border-border bg-paper active:bg-surface"
+              accessibilityRole="button"
+              accessibilityLabel={
+                evidencePhoto ? 'Alterar foto de evidência' : 'Adicionar foto de evidência'
+              }
+              className="flex-row items-center w-full py-[14px] px-4 rounded-2xl gap-[14px] border-[1.5px] border-border bg-paper active:bg-surface disabled:opacity-60"
             >
-              <View className="w-11 h-11 shrink-0 items-center justify-center rounded-[12px] bg-surface">
-                <Svg width={22} height={22} viewBox="0 0 22 22" fill="none">
-                  <Rect
-                    x={3}
-                    y={6}
-                    width={16}
-                    height={13}
-                    rx={2}
-                    stroke="#18191B"
-                    strokeWidth={1.6}
+              <View className="w-11 h-11 shrink-0 items-center justify-center rounded-[12px] bg-surface overflow-hidden">
+                {evidencePhoto ? (
+                  <Image
+                    source={{ uri: evidencePhoto.uri }}
+                    style={{ width: 44, height: 44 }}
+                    contentFit="cover"
+                    accessibilityIgnoresInvertColors
                   />
-                  <Path
-                    d="M8 6l1.3-2h3.4L14 6"
-                    stroke="#18191B"
-                    strokeWidth={1.6}
-                    strokeLinecap="round"
-                  />
-                  <Circle
-                    cx={11}
-                    cy={12.5}
-                    r={2.6}
-                    stroke="#18191B"
-                    strokeWidth={1.6}
-                  />
-                </Svg>
+                ) : (
+                  <Svg width={22} height={22} viewBox="0 0 22 22" fill="none">
+                    <Rect
+                      x={3}
+                      y={6}
+                      width={16}
+                      height={13}
+                      rx={2}
+                      stroke="#18191B"
+                      strokeWidth={1.6}
+                    />
+                    <Path
+                      d="M8 6l1.3-2h3.4L14 6"
+                      stroke="#18191B"
+                      strokeWidth={1.6}
+                      strokeLinecap="round"
+                    />
+                    <Circle
+                      cx={11}
+                      cy={12.5}
+                      r={2.6}
+                      stroke="#18191B"
+                      strokeWidth={1.6}
+                    />
+                  </Svg>
+                )}
               </View>
 
               <View className="flex-1 gap-0.5">
                 <Text className="font-sans-semibold text-ink text-[14px] leading-[20px]">
-                  {evidencePhoto ? 'evidencia_presenca.jpg' : 'Adicionar foto'}
+                  {evidencePhoto ? 'Foto de evidência' : 'Adicionar foto'}
                 </Text>
                 <Text className="font-sans text-muted text-caption">
                   {evidencePhoto
@@ -535,7 +589,7 @@ export default function ChamadaScreen() {
               </View>
 
               <Text className="font-sans-bold text-ink text-caption shrink-0">
-                {evidencePhoto ? 'Alterar' : 'Abrir'}
+                {evidencePhoto ? 'Alterar' : 'Câmera'}
               </Text>
             </Pressable>
           </View>
@@ -555,7 +609,11 @@ export default function ChamadaScreen() {
                 <View className="flex-row items-center gap-2">
                   <ActivityIndicator color="#FFFFFF" size="small" />
                   <Text className="font-sans-bold text-paper text-body">
-                    {submittingPhase === 'location' ? 'Obtendo GPS…' : 'Validando presença…'}
+                    {submittingPhase === 'location'
+                      ? 'Obtendo GPS…'
+                      : submittingPhase === 'photo'
+                        ? 'Enviando foto…'
+                        : 'Validando presença…'}
                   </Text>
                 </View>
               ) : (
