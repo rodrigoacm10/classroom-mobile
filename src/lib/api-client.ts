@@ -103,15 +103,23 @@ export type ApiOptions = Omit<RequestInit, 'body'> & {
   skipAuthRefresh?: boolean;
 };
 
+function isFormDataBody(body: unknown): body is FormData {
+  return typeof FormData !== 'undefined' && body instanceof FormData;
+}
+
 export async function api<T>(path: string, options: ApiOptions = {}): Promise<T> {
   const { body, headers = {}, _isRetry, skipAuthRefresh, ...rest } = options;
+  const multipart = isFormDataBody(body);
 
   const requestHeaders: Record<string, string> = {
     Accept: 'application/json',
     ...(headers as Record<string, string>),
   };
 
-  if (body !== undefined && !requestHeaders['Content-Type']) {
+  if (multipart) {
+    delete requestHeaders['Content-Type'];
+    delete requestHeaders['content-type'];
+  } else if (body !== undefined && !requestHeaders['Content-Type']) {
     requestHeaders['Content-Type'] = 'application/json';
   }
 
@@ -148,7 +156,12 @@ export async function api<T>(path: string, options: ApiOptions = {}): Promise<T>
     response = await fetch(fullUrl, {
       ...rest,
       headers: requestHeaders,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      body:
+        body === undefined
+          ? undefined
+          : multipart || typeof body === 'string'
+            ? (body as BodyInit)
+            : JSON.stringify(body),
     });
   } catch (netErr) {
     if (__DEV__) {
