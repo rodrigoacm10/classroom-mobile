@@ -1,4 +1,5 @@
 import { api } from '../lib/api-client';
+import { registerForPushNotificationsAsync } from '../lib/notifications';
 import {
   getStoredAccessToken,
   setStoredAccessToken,
@@ -69,6 +70,7 @@ export async function switchTenant(
 
   await setStoredAccessToken(res.access_token);
   await setStoredActiveTenantId(tenantId);
+  registerForPushNotificationsAsync().catch(() => {});
   return res;
 }
 

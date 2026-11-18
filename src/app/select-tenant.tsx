@@ -372,7 +372,7 @@ export default function SelectTenantScreen() {
         {/* Rodapé Padrão */}
         <View className="border-t border-border px-6 py-5 bg-paper">
           <View className="w-full max-w-[480px] self-center flex-row flex-wrap items-center justify-between gap-y-2">
-            <Text className="font-mono text-caption text-muted">Locus Classroom</Text>
+            <Text className="font-mono text-caption text-muted">Locus</Text>
             <View className="flex-row items-center gap-4">
               <Pressable
                 onPress={() =>

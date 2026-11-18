@@ -10,7 +10,7 @@ import Constants from 'expo-constants';
  */
 export function getApiUrl(): string {
   if (process.env.EXPO_PUBLIC_API_URL) {
-    return process.env.EXPO_PUBLIC_API_URL;
+    return process.env.EXPO_PUBLIC_API_URL.replace(/\/+$/, '');
   }
 
   if (__DEV__) {
