@@ -9,7 +9,7 @@ adaptive
 <!-- Recorded as the closest schema value: one Locus identity shared across iOS and Android (confirmed), while native conventions (safe areas, gestures, touch targets, Reduce Motion) are respected per OS. -->
 
 ## Users
-Alunos de instituições de ensino superior e técnico que usam o app Locus Classroom no celular: abrem o app em sala (para confirmar presença em uma chamada ao vivo) e entre as aulas (para conferir a própria frequência). Escopo deste arquivo: somente `classroom-app` (aluno); o `PRODUCT.md` da raiz descreve o dashboard web do professor/admin.
+Alunos de instituições de ensino superior e técnico que usam o app Locus no celular: abrem o app em sala (para confirmar presença em uma chamada ao vivo) e entre as aulas (para conferir a própria frequência). Escopo deste arquivo: somente `classroom-app` (aluno); o `PRODUCT.md` da raiz descreve o dashboard web do professor/admin.
 
 ## Product Purpose
 Permitir que o aluno confirme presença física via geofence (raio da sala + código do dia) e acompanhe a própria frequência por turma, com alerta quando se aproxima do limite de faltas (abaixo de 75% = em risco). Sucesso: o aluno sabe, sem pedir a ninguém, se sua presença foi registrada e se está em risco.

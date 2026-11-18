@@ -10,10 +10,13 @@
     "ios": {
       "icon": "./assets/expo.icon",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "O Locus precisa da sua localização para confirmar sua presença na sala de aula durante a chamada."
+        "NSLocationWhenInUseUsageDescription": "O Locus precisa da sua localização para confirmar sua presença na sala de aula durante a chamada.",
+        "NSCameraUsageDescription": "O Locus precisa da câmera para anexar uma foto de evidência da sua presença, quando você escolher."
       }
     },
     "android": {
+      "package": "com.locus.classroom",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -21,8 +24,11 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "permissions": [
-        "ACCESS_COARSE_LOCATION",
-        "ACCESS_FINE_LOCATION"
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.CAMERA",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.RECORD_AUDIO"
       ],
       "predictiveBackGestureEnabled": false
     },
@@ -46,11 +52,32 @@
         {
           "locationWhenInUsePermission": "O Locus precisa da sua localização para confirmar sua presença na sala de aula durante a chamada."
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "O Locus precisa da câmera para anexar uma foto de evidência da sua presença, quando você escolher."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#18191B",
+          "defaultChannel": "chamadas"
+        }
       ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "bd38d3ad-fd7e-4856-8e01-96f7614349e7"
+      }
+    },
+    "owner": "rodrigoacm10"
   }
 }

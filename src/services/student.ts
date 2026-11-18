@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 import { api } from '../lib/api-client';
 
 export type StudentActiveSessionResponse = {
@@ -81,7 +83,50 @@ export type ConfirmAttendancePayload = {
   gps_accuracy_meters?: number | null;
   device_id?: string | null;
   device_info?: Record<string, unknown> | null;
+  evidence_photo_url?: string | null;
 };
+
+export type EvidencePhotoFile = {
+  uri: string;
+  fileName: string;
+  mimeType: string;
+};
+
+export type EvidencePhotoUploadResponse = {
+  url: string;
+};
+
+/**
+ * POST multipart /subject-classes/{id}/attendance-sessions/{session_id}/evidence-photo
+ * A API devolve a URL pública. A confirmação usa essa URL em evidence_photo_url.
+ */
+export async function uploadStudentEvidencePhoto(
+  subjectClassId: string,
+  sessionId: string,
+  photo: EvidencePhotoFile,
+): Promise<EvidencePhotoUploadResponse> {
+  const body = new FormData();
+
+  if (Platform.OS === 'web') {
+    const fileResponse = await fetch(photo.uri);
+    const blob = await fileResponse.blob();
+    body.append('photo', blob, photo.fileName);
+  } else {
+    body.append('photo', {
+      uri: photo.uri,
+      name: photo.fileName,
+      type: photo.mimeType,
+    } as unknown as Blob);
+  }
+
+  return api<EvidencePhotoUploadResponse>(
+    `/subject-classes/${subjectClassId}/attendance-sessions/${sessionId}/evidence-photo`,
+    {
+      method: 'POST',
+      body,
+    },
+  );
+}
 
 export type AttendanceRecordResponse = {
   id: string;
